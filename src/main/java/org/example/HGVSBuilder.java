@@ -1,5 +1,7 @@
 package org.example;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class HGVSBuilder {
             allHGVS.forEach(hgvs -> {
                 try {
                     MyVariantInfoIterator.iterateHGVS(hgvs);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
             });
