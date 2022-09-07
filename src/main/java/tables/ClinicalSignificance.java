@@ -1,110 +1,169 @@
 package tables;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import file.FileReaderFromCsv;
+import file.FileWriterForCsv;
 
-import java.util.Date;
+import java.util.*;
 
 public class ClinicalSignificance {
-    private Integer id;
-    @JsonProperty("clinvar.rcv.accession") private String accession;
-    private Integer variantId;
-    private Integer pathologyId;
-    private Integer significanceId;
 
-    @JsonProperty("clinvar.rcv.last_evaluated") private Date evaluated;
+    static int clinicalSignificanceId = 1;
 
-    @JsonProperty("clinvar.rcv.review_status") private String reviewStatus;
-    private Date updated;
+    public static Map<String, String> getPathologies(){
+        List<String[]> result = FileReaderFromCsv.readFile("C:\\Users\\Dan\\Desktop\\GENETYLLIS_PATHOLOGY.csv");
+        Map<String, String> pathologies = new HashMap<>();
 
-    public ClinicalSignificance() {
+        result.forEach(line -> {
+            pathologies.put(line[1], line[0]);
+        });
+
+        return pathologies;
     }
 
-    public ClinicalSignificance(Integer id, String accession, Integer variantId, Integer pathologyId, Integer significanceId, Date evaluated, String reviewStatus, Date updated) {
-        this.id = id;
-        this.accession = accession;
-        this.variantId = variantId;
-        this.pathologyId = pathologyId;
-        this.significanceId = significanceId;
-        this.evaluated = evaluated;
-        this.reviewStatus = reviewStatus;
-        this.updated = updated;
+    public static void getClinicalSignificance(JsonObject response, int varId, Map<String, String> pathologies){
+
+        //CLINICAL SIGNIFICANCE
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        try{
+            if(response.has("clinvar") &&
+                    response.getAsJsonObject("clinvar").has("rcv")) {
+                if(response.getAsJsonObject("clinvar").getAsJsonArray("rcv").size() > 0) {
+                    JsonArray rcvArray = response.getAsJsonObject("clinvar").getAsJsonArray("rcv");
+                    rcvArray.forEach(rcv -> {
+                        if(rcv.getAsJsonObject().has("conditions")){
+                            if(rcv.getAsJsonObject().get("conditions").isJsonArray()) {
+                                JsonArray conditionsArray = rcv.getAsJsonObject().getAsJsonArray("conditions");
+                                conditionsArray.forEach(condition -> {
+                                    if (condition.getAsJsonObject().has("identifiers")) {
+                                        String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
+                                        String pathologyId = pathologies.get(condition.getAsJsonObject().getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString());
+                                        String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
+                                        String significanceId = getSignificance(significance);
+                                        String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
+                                        String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+
+//                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated});
+
+                                        clinicalSignificanceId++;
+                                    } else {
+                                        String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
+                                        String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
+                                        String significanceId = getSignificance(significance);
+                                        System.out.println(significanceId);
+                                        String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
+                                        String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+
+//                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+
+                                        clinicalSignificanceId++;
+                                    }
+                                });
+                            }
+                            else {
+                                if(rcv.getAsJsonObject().getAsJsonObject("conditions").has("identifiers")) {
+                                    String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
+                                    String pathologyId = pathologies.get(rcv.getAsJsonObject().getAsJsonObject("conditions").getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString());
+                                    String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
+                                    String significanceId = getSignificance(significance);
+                                    String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
+                                    String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+
+//                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated});
+
+                                    clinicalSignificanceId++;
+                                } else {
+                                    String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
+                                    String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
+                                    String significanceId = getSignificance(significance);
+                                    String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
+                                    String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+
+//                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+
+                                    clinicalSignificanceId++;
+                                }
+                            }
+                        }
+                    });
+
+                }else {
+                    String accession = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("accession") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("accession").getAsString() : "";
+                    String significance = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("clinical_significance") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("clinical_significance").toString() : "";
+                    String significanceId = getSignificance(significance);
+                    String evaluated = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("last_evaluated") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("last_evaluated").toString() : "";
+                    String updated = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("review_status") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("review_status").toString() : "";
+
+//                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
+                   write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+
+                    clinicalSignificanceId++;
+                }
+            }
+
+
+//            if(rcv is defined) {
+//                if(rcv is array) {
+//                    if (conditions is array) {
+//                        loop conditions {
+//                            if(conditions has identifiers) {
+//                                create object with cui
+//                            } else {
+//                                create object without cui
+//                            }
+//                        }
+//                    } else {
+//                        if(conditions has identifiers) {
+//                            create object with cui
+//                        } else {
+//                            create object without cui
+//                        }
+//                    }
+//                } else {
+//                    create object with cui
+//                }
+//            }
+        }
+        catch(ClassCastException e){
+//            System.out.println(response.getAsJsonObject("clinvar").getAsJsonArray("rcv").toString());
+        }
     }
 
-    public Integer getId() {
-        return id;
-    }
+    private static String getSignificance(String significance){
+        String significanceId;
+        switch(significance.substring(1, significance.length() - 1)) {
+            case "Pathogenic":
+                significanceId = "1";
+                break;
+            case "Likely pathogenic":
+                significanceId =  "2";
+                break;
+            case "Uncertain significance":
+                significanceId =  "3";
+                break;
+            case "Likely benign":
+                significanceId =  "4";
+                break;
+            case "Benign":
+                significanceId =  "5";
+                break;
+            default: significanceId =  "";
+                break;
+        }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getAccession() {
-        return accession;
-    }
-
-    public void setAccession(String accession) {
-        this.accession = accession;
-    }
-
-    public Integer getVariantId() {
-        return variantId;
-    }
-
-    public void setVariantId(Integer variantId) {
-        this.variantId = variantId;
-    }
-
-    public Integer getPathologyId() {
-        return pathologyId;
-    }
-
-    public void setPathologyId(Integer pathologyId) {
-        this.pathologyId = pathologyId;
-    }
-
-    public Integer getSignificanceId() {
         return significanceId;
     }
 
-    public void setSignificanceId(Integer significanceId) {
-        this.significanceId = significanceId;
-    }
-
-    public Date getEvaluated() {
-        return evaluated;
-    }
-
-    public void setEvaluated(Date evaluated) {
-        this.evaluated = evaluated;
-    }
-
-    public String getReviewStatus() {
-        return reviewStatus;
-    }
-
-    public void setReviewStatus(String reviewStatus) {
-        this.reviewStatus = reviewStatus;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    @Override
-    public String toString() {
-        return "ClinicalSignificance{" +
-                "id=" + id +
-                ", accession='" + accession + '\'' +
-                ", variantId=" + variantId +
-                ", pathologyId=" + pathologyId +
-                ", significanceId=" + significanceId +
-                ", evaluated=" + evaluated +
-                ", reviewStatus='" + reviewStatus + '\'' +
-                ", updated=" + updated +
-                '}';
+    private static void write(String[] data){
+        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\clinical_significance.csv",
+                new String[]{"Id", "Accession", "VariantId", "PathologyId", "SignificanceId", "Evaluated", "ReviewStatus", "Updated"},
+                data );
     }
 }

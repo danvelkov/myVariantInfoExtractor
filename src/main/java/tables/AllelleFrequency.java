@@ -1,84 +1,78 @@
 package tables;
 
-import java.util.Date;
+import com.google.gson.JsonObject;
+import file.FileWriterForCsv;
+
+import java.util.*;
 
 public class AllelleFrequency {
-    private Integer id;
-    private Integer variantId;
-    private Integer genderId;
-    private Integer populationId;
-    private Double frequency;
-    private Date updated;
+    static int alleleFrequencyId = 1;
 
-    public AllelleFrequency() {
+    public static void getAlleleFrequencies(JsonObject response, int varId){
+        //ALLELE FREQUENCY
+        String af = response.has("gnomad_exome") &&
+                response.getAsJsonObject("gnomad_genome").has("af") &&
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").has("af") ?
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").getAsJsonPrimitive("af").toString() : "";
+        String af_nfe_bgr = response.has("gnomad_genome") &&
+                response.getAsJsonObject("gnomad_genome").has("af") &&
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").has("af_nfe_bgr") ?
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").getAsJsonPrimitive("af_nfe_bgr").toString() : "";
+        String af_nfe_male = response.has("gnomad_genome") &&
+                response.getAsJsonObject("gnomad_genome").has("af") &&
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").has("af_nfe_male") ?
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").getAsJsonPrimitive("af_nfe_male").toString() : "";
+        String af_nfe_female = response.has("gnomad_genome") &&
+                response.getAsJsonObject("gnomad_genome").has("af") &&
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").has("af_nfe_female") ?
+                response.getAsJsonObject("gnomad_genome").getAsJsonObject("af").getAsJsonPrimitive("af_nfe_female").toString() : "";
+
+        List<String[]> alleleFrequencyArray = new ArrayList<>();
+
+        int genderId = 0;
+        int populationId = 0;
+        double frequency = 0.0;
+        java.sql.Date updated = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+
+        if(!af.isEmpty()) {
+            populationId = 18;
+            genderId = 3;
+            frequency = Double.parseDouble(af);
+            alleleFrequencyArray.add(new String[]{Integer.toString(alleleFrequencyId), Integer.toString(varId), Integer.toString(genderId), Integer.toString(populationId), Double.toString(frequency), updated.toString()});
+            alleleFrequencyId++;
+//            System.out.println(Integer.toString(alleleFrequencyId));
+        }
+        if(!af_nfe_bgr.isEmpty()) {
+            populationId = 12;
+            genderId = 3;
+            frequency = Double.parseDouble(af_nfe_bgr);
+            alleleFrequencyArray.add(new String[]{Integer.toString(alleleFrequencyId), Integer.toString(varId), Integer.toString(genderId), Integer.toString(populationId), Double.toString(frequency), updated.toString()});
+            alleleFrequencyId++;
+//            System.out.println(Integer.toString(alleleFrequencyId));
+        }
+        if(!af_nfe_male.isEmpty()) {
+            populationId = 11;
+            genderId = 1;
+            frequency = Double.parseDouble(af_nfe_male);
+            alleleFrequencyArray.add(new String[]{Integer.toString(alleleFrequencyId), Integer.toString(varId), Integer.toString(genderId), Integer.toString(populationId), Double.toString(frequency), updated.toString()});
+            alleleFrequencyId++;
+//            System.out.println(Integer.toString(alleleFrequencyId));
+        }
+        if(!af_nfe_female.isEmpty()) {
+            populationId = 11;
+            genderId = 2;
+            frequency = Double.parseDouble(af_nfe_female);
+            alleleFrequencyArray.add(new String[]{Integer.toString(alleleFrequencyId), Integer.toString(varId), Integer.toString(genderId), Integer.toString(populationId), Double.toString(frequency), updated.toString()});
+            alleleFrequencyId++;
+//            System.out.println(Integer.toString(alleleFrequencyId));
+        }
+
+        if(!alleleFrequencyArray.isEmpty())
+            alleleFrequencyArray.forEach(AllelleFrequency::write);
+    }
+    private static void write(String[] data){
+        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\alleleFrequency.csv",
+                new String[]{"Id", "VariantId", "GenderId", "PopulationId", "Frequency", "Updated"}, data );
     }
 
-    public AllelleFrequency(Integer id, Integer variantId, Integer genderId, Integer populationId, Double frequency, Date updated) {
-        this.id = id;
-        this.variantId = variantId;
-        this.genderId = genderId;
-        this.populationId = populationId;
-        this.frequency = frequency;
-        this.updated = updated;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getVariantId() {
-        return variantId;
-    }
-
-    public void setVariantId(Integer variantId) {
-        this.variantId = variantId;
-    }
-
-    public Integer getGenderId() {
-        return genderId;
-    }
-
-    public void setGenderId(Integer genderId) {
-        this.genderId = genderId;
-    }
-
-    public Integer getPopulationId() {
-        return populationId;
-    }
-
-    public void setPopulationId(Integer populationId) {
-        this.populationId = populationId;
-    }
-
-    public Double getFrequency() {
-        return frequency;
-    }
-
-    public void setFrequency(Double frequency) {
-        this.frequency = frequency;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    @Override
-    public String toString() {
-        return "AllelleFrequency{" +
-                "id=" + id +
-                ", variantId=" + variantId +
-                ", genderId=" + genderId +
-                ", populationId=" + populationId +
-                ", frequency=" + frequency +
-                ", updated=" + updated +
-                '}';
-    }
 }

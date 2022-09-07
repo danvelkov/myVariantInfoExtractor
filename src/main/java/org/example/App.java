@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args ) throws InterruptedException {
         List<String> files = new ArrayList<>(Arrays.asList(
-//                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr1_accession",
+                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chrY_accession"));
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr2_accession",
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr3_accession",
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr4_accession",
@@ -31,7 +31,7 @@ public class App
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr21_accession",
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr22_accession",
 //                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chrX_accession",
-                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chrY_accession"));
+//                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chrY_accession"));
         HGVSBuilder.selectFiles(files);
     }
 }

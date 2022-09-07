@@ -16,14 +16,14 @@ public class FileWriterForCsv {
         File file = new File(filePath);
         try {
             // create FileWriter object with file as parameter
-            FileWriter outputfile = new FileWriter (file);
+            FileWriter outputfile = new FileWriter (file, true);
 
             // create CSVWriter object filewriter object as parameter
-            CSVWriter writer = new CSVWriter(outputfile);
+            CSVWriter writer = new CSVWriter(outputfile, ',', Character.MIN_VALUE);
 
             // adding header to csv
-
-            writer.writeNext(header);
+            if(file.length() == 0)
+                writer.writeNext(header);
 
             // add data to csv
 

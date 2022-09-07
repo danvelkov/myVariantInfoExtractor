@@ -1,62 +1,56 @@
 package tables;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.*;
+import file.FileWriterForCsv;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class Gene {
-    private Integer id;
-    @JsonProperty("cadd.gene.gene_id") private String geneId;
-    @JsonProperty("cadd.gene.genename") private String name;
-    private Boolean pseudo;
+    static int geneId = 1;
 
-    public Gene() {
+    public static Map<String, Integer> getGenes(JsonObject response){
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        //GENE
+        Map<String, Integer> geneIdMap = new HashMap<>();
+        Map<String, String> geneMap = new HashMap<>();
+        if(response.has("cadd") && response.getAsJsonObject("cadd").has("gene"))
+            if(response.getAsJsonObject("cadd").get("gene").isJsonArray()) {
+                JsonArray genesArray = response.getAsJsonObject("cadd").getAsJsonArray("gene");
+                for (JsonElement jsonElement : genesArray) {
+                    JsonObject geneInsideArray = gson.fromJson(jsonElement, JsonObject.class);
+                    if(geneInsideArray.has("gene_id") && geneInsideArray.has("genename")) {
+                        geneMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(),
+                                geneInsideArray.getAsJsonPrimitive("genename").getAsString());
+
+                        geneIdMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(), geneId);
+                        geneId++;
+                    }
+                }
+            } else
+            if(response.getAsJsonObject("cadd").getAsJsonObject("gene").has("gene_id")
+                    && response.getAsJsonObject("cadd").getAsJsonObject("gene").has("genename")) {
+                geneMap.put(response.getAsJsonObject("cadd").getAsJsonObject("gene").getAsJsonPrimitive("gene_id").toString(),
+                        response.getAsJsonObject("cadd").getAsJsonObject("gene").getAsJsonPrimitive("genename").toString());
+
+                geneIdMap.put(response.getAsJsonObject("cadd").getAsJsonObject("gene").getAsJsonPrimitive("gene_id").toString(), geneId);
+                geneId++;
+            }
+        boolean isPseudo = false;
+
+        for (Map.Entry<String, String> gene: geneMap.entrySet()) {
+//            System.out.println(Arrays.toString(new String[]{String.valueOf(geneIdMap.get(gene.getKey())), gene.getKey(), gene.getValue(), String.valueOf(isPseudo)}));
+            write(new String[]{String.valueOf(geneIdMap.get(gene.getKey())), gene.getKey(), gene.getValue(), String.valueOf(isPseudo)});
+        }
+
+        return geneIdMap;
     }
 
-    public Gene(Integer id, String geneId, String name, Boolean pseudo) {
-        this.id = id;
-        this.geneId = geneId;
-        this.name = name;
-        this.pseudo = pseudo;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getGeneId() {
-        return geneId;
-    }
-
-    public void setGeneId(String geneId) {
-        this.geneId = geneId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Boolean getPseudo() {
-        return pseudo;
-    }
-
-    public void setPseudo(Boolean pseudo) {
-        this.pseudo = pseudo;
-    }
-
-    @Override
-    public String toString() {
-        return "Gene{" +
-                "id=" + id +
-                ", geneId='" + geneId + '\'' +
-                ", name='" + name + '\'' +
-                ", pseudo=" + pseudo +
-                '}';
+    private static void write(String[] data){
+        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\gene.csv",
+                new String[]{"Id", "GeneId", "Name", "Pseudo"}, data );
     }
 }
