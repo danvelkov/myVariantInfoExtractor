@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 public class FileWriterForCsv {
 
-    public static void writeDataLineByLine(String filePath, String[] header, String[] line)
+    public static synchronized void writeDataLineByLine(String filePath, String[] header, String[] line)
     {
         // first create file object for file placed at location
         // specified by filepath

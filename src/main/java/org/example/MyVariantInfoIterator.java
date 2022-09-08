@@ -13,23 +13,39 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.*;
 
 import static tables.Variant.getVariant;
+import static tables.Variant.getVariantId;
 import static thread.CustomRecursiveAction.batches;
 
 public class MyVariantInfoIterator {
 
 //    private static Set<String> insertedHgvs = new HashSet<>();
+
     public static void iterateHGVS(List<String> chrWithHGVS) throws InterruptedException, JsonProcessingException {
         System.out.println(chrWithHGVS.size());
 
         Map<String, String> pathologies = ClinicalSignificance.getPathologies();
 //        CustomRecursiveAction customRecursiveAction = new CustomRecursiveAction(chrWithHGVS, pathologies);
 
+        List<Thread> threads = new ArrayList<>();
 
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         batches(chrWithHGVS, 100).forEach(batch -> {
-            new Thread(new IterateList(batch, pathologies)).start();
+            Thread newThread = new Thread(new IterateList(batch, pathologies));
+            threads.add(newThread);
+//            executorService.execute(new IterateList(batch, pathologies));
+            newThread.start();
         });
+
+//        executorService.shutdown();
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        System.out.println(getVariantId());
 
 
 //        CustomRecursiveAction customRecursiveAction = new CustomRecursiveAction(batches(chrWithHGVS, 100).collect(), pathologies);
@@ -66,6 +82,7 @@ public class MyVariantInfoIterator {
                 in.close();
 
                 con.disconnect();
+
             } catch (IOException e) {
 //                throw new RuntimeException(e);
             }
