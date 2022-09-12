@@ -185,7 +185,7 @@ public class Variant {
     }
 
     private synchronized static boolean write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\variant.csv",
+        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\variant.csv",
                 new String[]{"Id", "HGVS", "Chromosome", "Start", "End", "DBSNP", "Reference", "Alternative", "GeneId", "Region", "RegionNum", "Consequence", "ConsequenceDetails"},
                 data);
 

@@ -14,7 +14,7 @@ public class ClinicalSignificance {
     static int clinicalSignificanceId = 1;
 
     public static Map<String, String> getPathologies(){
-        List<String[]> result = FileReaderFromCsv.readFile("C:\\Users\\Dan\\Desktop\\GENETYLLIS_PATHOLOGY.csv");
+        List<String[]> result = FileReaderFromCsv.readFile("E:\\Quanterall\\myVariantInfoExtractor\\resources\\GENETYLLIS_PATHOLOGY.csv");
         Map<String, String> pathologies = new HashMap<>();
 
         result.forEach(line -> {
@@ -162,7 +162,7 @@ public class ClinicalSignificance {
     }
 
     private static void write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\clinical_significance.csv",
+        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\clinical_significance.csv",
                 new String[]{"Id", "Accession", "VariantId", "PathologyId", "SignificanceId", "Evaluated", "ReviewStatus", "Updated"},
                 data );
     }

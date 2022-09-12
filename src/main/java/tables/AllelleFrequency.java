@@ -71,7 +71,7 @@ public class AllelleFrequency {
             alleleFrequencyArray.forEach(AllelleFrequency::write);
     }
     private static void write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\alleleFrequency.csv",
+        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\alleleFrequency.csv",
                 new String[]{"Id", "VariantId", "GenderId", "PopulationId", "Frequency", "Updated"}, data );
     }
 

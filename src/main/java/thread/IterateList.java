@@ -17,10 +17,10 @@ public class IterateList implements Runnable{
 
     @Override
     public void run() {
-        try {
-            MyVariantInfoIterator.getMyVariantInfo(workload, pathologies);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            MyVariantInfoIterator.getMyVariantInfo(workload, pathologies);
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

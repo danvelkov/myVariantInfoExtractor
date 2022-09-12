@@ -59,7 +59,7 @@ public class CustomRecursiveAction extends RecursiveAction {
     }
 
     private void processing(List<String> work) throws FileNotFoundException {
-        MyVariantInfoIterator.getMyVariantInfo(work, this.pathologies);
+//        MyVariantInfoIterator.getMyVariantInfo(work, this.pathologies);
 //        logger.info("This result - (" + result + ") - was processed by "
 //                + Thread.currentThread().getName());
     }
