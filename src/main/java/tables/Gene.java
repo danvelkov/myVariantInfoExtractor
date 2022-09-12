@@ -50,7 +50,7 @@ public class Gene {
     }
 
     private static void write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\gene.csv",
+        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\gene.csv",
                 new String[]{"Id", "GeneId", "Name", "Pseudo"}, data );
     }
 }

@@ -29,64 +29,71 @@ public class MyVariantInfoIterator {
         Map<String, String> pathologies = ClinicalSignificance.getPathologies();
 //        CustomRecursiveAction customRecursiveAction = new CustomRecursiveAction(chrWithHGVS, pathologies);
 
-        List<Thread> threads = new ArrayList<>();
+//        List<Thread> threads = new ArrayList<>();
+//
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        batches(chrWithHGVS, 100).forEach(batch -> {
+//            Thread newThread = new Thread(new IterateList(batch, pathologies));
+//            threads.add(newThread);
+////            executorService.execute(new IterateList(batch, pathologies));
+//            newThread.start();
+//        });
+//
+////        executorService.shutdown();
+//
+//        for (Thread thread : threads) {
+//            thread.join();
+//        }
+//
+//        System.out.println(getVariantId());
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        batches(chrWithHGVS, 100).forEach(batch -> {
-            Thread newThread = new Thread(new IterateList(batch, pathologies));
-            threads.add(newThread);
-//            executorService.execute(new IterateList(batch, pathologies));
-            newThread.start();
+        chrWithHGVS.stream().parallel().forEach(element -> {
+            try {
+                getMyVariantInfo(element, pathologies);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         });
-
-//        executorService.shutdown();
-
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        System.out.println(getVariantId());
 
 
 //        CustomRecursiveAction customRecursiveAction = new CustomRecursiveAction(batches(chrWithHGVS, 100).collect(), pathologies);
     }
 
-    public static void getMyVariantInfo(List<String> subSetHgvs, Map<String, String> pathologies) throws FileNotFoundException {
+    public static void getMyVariantInfo(String hgvs, Map<String, String> pathologies) throws FileNotFoundException {
 //        if(insertedHgvs.size() > 400){
 //            insertedHgvs = split(insertedHgvs, 200).get(1);
 //        }
 
-        subSetHgvs.forEach(hgvs -> {
-            try {
-                URL url = new URL("https://myvariant.info/v1/variant/" + hgvs +
-                        "?fields=_id,clinvar.rcv.conditions.identifiers.medgen,clinvar.rcv.conditions.name," +
-                        "cadd.consequence,cadd.consdetail,cadd.gene.gene_id,cadd.gene.genename,cadd.exon," +
-                        "cadd.intron,dbsnp.hg19.end,dbsnp.hg19.start,clinvar.hg38.end,clinvar.hg38.start," +
-                        "clinvar.alt,clinvar.ref,clinvar.chrom,clinvar.rcv.accession,clinvar.rcv.clinical_significance," +
-                        "clinvar.rcv.last_evaluated,clinvar.rcv.review_status,dbsnp.rsid,dbsnp.alt,dbsnp.ref,dbsnp.chrom," +
-                        "gnomad_genome.af.af,gnomad_genome.af.af_nfe_bgr,gnomad_genome.af.af_nfe_male,gnomad_genome.af.af_nfe_female\n");
+        try {
+            System.out.println(hgvs);
+            URL url = new URL("https://myvariant.info/v1/variant/" + hgvs +
+                    "?fields=_id,clinvar.rcv.conditions.identifiers.medgen,clinvar.rcv.conditions.name," +
+                    "cadd.consequence,cadd.consdetail,cadd.gene.gene_id,cadd.gene.genename,cadd.exon," +
+                    "cadd.intron,dbsnp.hg19.end,dbsnp.hg19.start,clinvar.hg38.end,clinvar.hg38.start," +
+                    "clinvar.alt,clinvar.ref,clinvar.chrom,clinvar.rcv.accession,clinvar.rcv.clinical_significance," +
+                    "clinvar.rcv.last_evaluated,clinvar.rcv.review_status,dbsnp.rsid,dbsnp.alt,dbsnp.ref,dbsnp.chrom," +
+                    "gnomad_genome.af.af,gnomad_genome.af.af_nfe_bgr,gnomad_genome.af.af_nfe_male,gnomad_genome.af.af_nfe_female\n");
 //                        System.out.println(url);
 
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuilder content = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-
-                generateObjects(content.toString().replaceAll("\"", "\\\""), pathologies);
-
-                in.close();
-
-                con.disconnect();
-
-            } catch (IOException e) {
-//                throw new RuntimeException(e);
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
             }
-        });
+
+            generateObjects(content.toString().replaceAll("\"", "\\\""), pathologies);
+
+            in.close();
+
+            con.disconnect();
+
+        } catch (IOException e) {
+//                throw new RuntimeException(e);
+        }
 
     }
 
