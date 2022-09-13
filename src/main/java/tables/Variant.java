@@ -8,12 +8,11 @@ import file.FileWriterForCsv;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static tables.AllelleFrequency.getAlleleFrequencies;
+import static tables.AlleleFrequency.getAlleleFrequencies;
 import static tables.ClinicalSignificance.getClinicalSignificance;
 import static tables.Gene.getGenes;
 
 public class Variant {
-
     private static final Object lock = new Object();
     static int variantId = 0;
 
@@ -36,7 +35,6 @@ public class Variant {
         String reference = response.has("dbsnp") && response.getAsJsonObject("dbsnp").has("ref") ? response.getAsJsonObject("dbsnp").getAsJsonPrimitive("ref").getAsString() : "";
         String alternative = response.has("dbsnp") && response.getAsJsonObject("dbsnp").has("alt") ? response.getAsJsonObject("dbsnp").getAsJsonPrimitive("alt").getAsString() : "";
 
-        //TODO what if there aren't any genes
         Map<String, Integer> genesId = getGenes(response);
         AtomicInteger geneMapElemIndex = new AtomicInteger();
         if(genesId.size() > 0){
@@ -78,24 +76,16 @@ public class Variant {
                     } else
                         consDetailsStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString());
 
-//                    if(!insertedHgvs.contains(hgvs)) {
                 synchronized (lock) {
                     try {
-                        if(Thread.currentThread().getName().equals("Thread-1"))
-                            System.out.println("bef1" + Thread.currentThread().getName());
                         while(!incrementVariantId())
                             lock.wait();
 
-//                        lock.notifyAll();
-
-//                      while(
                         write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, String.valueOf(genesId.get(gene)), region, regionNum, String.valueOf(consStrings), String.valueOf(consDetailsStrings)});
-//                          lock.wait();
 
                         getAlleleFrequencies(response, getVariantId());
                         getClinicalSignificance(response, getVariantId(), pathologies);
-//                        System.out.println("b1");
-//                        incrementVariantId();
+
                         lock.notifyAll();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
@@ -103,10 +93,6 @@ public class Variant {
                 }
 
                 geneMapElemIndex.getAndIncrement();
-                if(geneMapElemIndex.equals(genesId.size())){
-//                    System.out.println(hgvs);
-                }
-//                    }
             });}
         else {
             String region = "";
@@ -146,46 +132,26 @@ public class Variant {
                 } else
                     consDetailsStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString());
 
-//                if(!insertedHgvs.contains(hgvs)) {
             synchronized (lock) {
                 try {
-                    if(Thread.currentThread().getName().equals("Thread-1"))
-                        System.out.println("bef2" + Thread.currentThread().getName());
-                    //TODO https://stackoverflow.com/questions/2536692/a-simple-scenario-using-wait-and-notify-in-java
                     while(!incrementVariantId())
                         lock.wait();
 
-//                    lock.notifyAll();
-
-//                    System.out.println("a2");
-//                    while(
                     write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, null, region, regionNum, String.valueOf(consStrings), String.valueOf(consDetailsStrings)});
-//                        lock.wait();
 
                     getAlleleFrequencies(response, getVariantId());
                     getClinicalSignificance(response, getVariantId(), pathologies);
-//                    System.out.println("b2");
-//                    incrementVariantId();
+
                     lock.notifyAll();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
-
-//            System.out.println(variantId);
-//                    insertedHgvs.add(hgvs);
-//                }
         }
-
-//        } catch(ClassCastException e){
-//            System.out.println(hgvs);
-//        }
-
-
     }
 
     private synchronized static boolean write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\variant.csv",
+        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\variant.csv",
                 new String[]{"Id", "HGVS", "Chromosome", "Start", "End", "DBSNP", "Reference", "Alternative", "GeneId", "Region", "RegionNum", "Consequence", "ConsequenceDetails"},
                 data);
 

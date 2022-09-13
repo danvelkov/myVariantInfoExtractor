@@ -22,6 +22,7 @@ import static thread.CustomRecursiveAction.batches;
 public class MyVariantInfoIterator {
 
 //    private static Set<String> insertedHgvs = new HashSet<>();
+    private static int counter = 0;
 
     public static void iterateHGVS(List<String> chrWithHGVS) throws InterruptedException, JsonProcessingException {
         System.out.println(chrWithHGVS.size());
@@ -55,17 +56,14 @@ public class MyVariantInfoIterator {
             }
         });
 
+        System.out.println(counter);
 
 //        CustomRecursiveAction customRecursiveAction = new CustomRecursiveAction(batches(chrWithHGVS, 100).collect(), pathologies);
     }
 
     public static void getMyVariantInfo(String hgvs, Map<String, String> pathologies) throws FileNotFoundException {
-//        if(insertedHgvs.size() > 400){
-//            insertedHgvs = split(insertedHgvs, 200).get(1);
-//        }
-
         try {
-            System.out.println(hgvs);
+//            System.out.println(hgvs);
             URL url = new URL("https://myvariant.info/v1/variant/" + hgvs +
                     "?fields=_id,clinvar.rcv.conditions.identifiers.medgen,clinvar.rcv.conditions.name," +
                     "cadd.consequence,cadd.consdetail,cadd.gene.gene_id,cadd.gene.genename,cadd.exon," +
@@ -77,6 +75,9 @@ public class MyVariantInfoIterator {
 
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
+
+            if(con.getResponseCode() == 404)
+                counter++;
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;

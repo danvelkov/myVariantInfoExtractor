@@ -8,7 +8,7 @@ public class App
 {
     public static void main( String[] args ) throws InterruptedException {
         List<String> files = new ArrayList<>(Arrays.asList(
-                "E:\\Quanterall\\myVariantInfoExtractor\\resources\\output_new_chrY_accession.bak"));
+                "C:\\Users\\Dan\\Desktop\\chromosome_accessions\\output_new_chr1_accession"));
         HGVSBuilder.selectFiles(files);
     }
 }

@@ -14,7 +14,7 @@ public class ClinicalSignificance {
     static int clinicalSignificanceId = 1;
 
     public static Map<String, String> getPathologies(){
-        List<String[]> result = FileReaderFromCsv.readFile("E:\\Quanterall\\myVariantInfoExtractor\\resources\\GENETYLLIS_PATHOLOGY.csv");
+        List<String[]> result = FileReaderFromCsv.readFile("C:\\Users\\Dan\\Desktop\\GENETYLLIS_PATHOLOGY.csv");
         Map<String, String> pathologies = new HashMap<>();
 
         result.forEach(line -> {
@@ -25,7 +25,6 @@ public class ClinicalSignificance {
     }
 
     public static void getClinicalSignificance(JsonObject response, int varId, Map<String, String> pathologies){
-
         //CLINICAL SIGNIFICANCE
         Gson gson = new GsonBuilder().serializeNulls().create();
         try{
@@ -40,26 +39,29 @@ public class ClinicalSignificance {
                                 conditionsArray.forEach(condition -> {
                                     if (condition.getAsJsonObject().has("identifiers")) {
                                         String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
-                                        String pathologyId = pathologies.get(condition.getAsJsonObject().getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString());
+                                        String pathologyName = condition.getAsJsonObject().getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString();
+                                        String pathologyId = pathologies.get(pathologyName.substring(1, pathologyName.length() - 1));
+//                                        System.out.println(pathologies.get(pathologyName.substring(1, pathologyName.length() - 1)));
                                         String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
                                         String significanceId = getSignificance(significance);
                                         String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
-                                        String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                        String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                        String updated = String.valueOf(java.time.LocalDate.now());
 
 //                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
-                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated});
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
 
                                         clinicalSignificanceId++;
                                     } else {
                                         String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
                                         String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
                                         String significanceId = getSignificance(significance);
-                                        System.out.println(significanceId);
+//                                        System.out.println(significanceId);
                                         String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
-                                        String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
-
+                                        String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                        String updated = String.valueOf(java.time.LocalDate.now());
 //                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
 
                                         clinicalSignificanceId++;
                                     }
@@ -68,14 +70,16 @@ public class ClinicalSignificance {
                             else {
                                 if(rcv.getAsJsonObject().getAsJsonObject("conditions").has("identifiers")) {
                                     String accession = rcv.getAsJsonObject().has("accession") ? rcv.getAsJsonObject().getAsJsonPrimitive("accession").getAsString() : "";
-                                    String pathologyId = pathologies.get(rcv.getAsJsonObject().getAsJsonObject("conditions").getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString());
+                                    String pathologyName = rcv.getAsJsonObject().getAsJsonObject("conditions").getAsJsonObject("identifiers").getAsJsonPrimitive("medgen").toString();
+                                    String pathologyId = pathologies.get(pathologyName.substring(1, pathologyName.length() - 1));
+//                                    System.out.println(pathologies.get(pathologyName.substring(1, pathologyName.length() - 1)));
                                     String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
                                     String significanceId = getSignificance(significance);
                                     String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
-                                    String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
-
+                                    String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                    String updated = String.valueOf(java.time.LocalDate.now());
 //                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
-                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated});
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
 
                                     clinicalSignificanceId++;
                                 } else {
@@ -83,10 +87,10 @@ public class ClinicalSignificance {
                                     String significance = rcv.getAsJsonObject().has("clinical_significance") ? rcv.getAsJsonObject().getAsJsonPrimitive("clinical_significance").toString() : "";
                                     String significanceId = getSignificance(significance);
                                     String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
-                                    String updated = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
-
+                                    String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                    String updated = String.valueOf(java.time.LocalDate.now());
 //                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
 
                                     clinicalSignificanceId++;
                                 }
@@ -99,10 +103,10 @@ public class ClinicalSignificance {
                     String significance = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("clinical_significance") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("clinical_significance").toString() : "";
                     String significanceId = getSignificance(significance);
                     String evaluated = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("last_evaluated") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("last_evaluated").toString() : "";
-                    String updated = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("review_status") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("review_status").toString() : "";
-
+                    String reviewStatus = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("review_status") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("review_status").toString() : "";
+                    String updated = String.valueOf(java.time.LocalDate.now());
 //                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                   write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated});
+                   write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
 
                     clinicalSignificanceId++;
                 }
@@ -162,7 +166,7 @@ public class ClinicalSignificance {
     }
 
     private static void write(String[] data){
-        FileWriterForCsv.writeDataLineByLine("E:\\Quanterall\\myVariantInfoExtractor\\resources\\clinical_significance.csv",
+        FileWriterForCsv.writeDataLineByLine("C:\\Users\\Dan\\Desktop\\output\\clinical_significance.csv",
                 new String[]{"Id", "Accession", "VariantId", "PathologyId", "SignificanceId", "Evaluated", "ReviewStatus", "Updated"},
                 data );
     }
