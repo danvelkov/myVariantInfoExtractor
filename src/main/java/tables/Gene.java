@@ -26,13 +26,36 @@ public class Gene {
                 for (JsonElement jsonElement : genesArray) {
                     JsonObject geneInsideArray = gson.fromJson(jsonElement, JsonObject.class);
                     if(geneInsideArray.has("gene_id") && geneInsideArray.has("genename")) {
-                        geneMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(),
-                                geneInsideArray.getAsJsonPrimitive("genename").getAsString());
 
-                        geneIdMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(), geneId);
-                        incrementGeneId();
+                        synchronized (lock) {
+                            try {
+                                while(!incrementGeneId())
+                                    lock.wait();
+
+                                geneMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(),
+                                        geneInsideArray.getAsJsonPrimitive("genename").getAsString());
+
+                                geneIdMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(), geneId);
+//                                incrementGeneId();
+
+                                lock.notifyAll();
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+
+//
+//                        geneMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(),
+//                                geneInsideArray.getAsJsonPrimitive("genename").getAsString());
+//
+//                        geneIdMap.put(geneInsideArray.getAsJsonPrimitive("gene_id").getAsString(), geneId);
+//                        incrementGeneId();
                     }
                 }
+
+               geneMap.entrySet().forEach(entry -> {
+                   write(new String[]{String.valueOf(geneIdMap.get(entry.getKey())), entry.getKey(), entry.getValue(), String.valueOf(false)});
+               });
             } else
             if(response.getAsJsonObject("cadd").getAsJsonObject("gene").has("gene_id")
                     && response.getAsJsonObject("cadd").getAsJsonObject("gene").has("genename")) {
@@ -59,6 +82,8 @@ public class Gene {
                 }
 
             }
+
+        System.out.println(geneIdMap);
         return geneIdMap;
     }
 

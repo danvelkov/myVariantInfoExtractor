@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import file.FileWriterForCsv;
 
+import javax.swing.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,11 +16,17 @@ import static tables.Gene.getGenes;
 public class Variant {
     private static final Object lock = new Object();
     static int variantId = 0;
+//    static int geneId = 0;
 
     public synchronized static boolean incrementVariantId(){
         ++variantId;
         return true;
     }
+
+//    public synchronized static boolean incrementGeneId(){
+//        ++geneId;
+//        return true;
+//    }
 
     public static int getVariantId(){
         return variantId;
@@ -41,47 +48,78 @@ public class Variant {
             genesId.keySet().forEach(gene -> {
                 String region = "";
                 String regionNum = "";
+                String consequence = "";
+                String consequenceDetails = "";
                 if (response.has("cadd") && response.getAsJsonObject("cadd").has("exon")) {
-                    if(response.getAsJsonObject("cadd").get("exon").isJsonArray())
-                        regionNum = response.getAsJsonObject("cadd").getAsJsonArray("exon").toString();
+                    if(response.getAsJsonObject("cadd").get("exon").isJsonArray()) {
+                        JsonArray regionNumArray = response.getAsJsonObject("cadd").getAsJsonArray("exon");
+                        StringBuilder finalRegionNum = new StringBuilder(regionNum);
+                        regionNumArray.forEach(regionNumElem -> {
+                            if(finalRegionNum.length() == 0)
+                                finalRegionNum.append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                            else
+                                finalRegionNum.append(",").append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                        });
+                        regionNum = "[" + finalRegionNum + "]";
+                    }
                     else
                         regionNum = response.has("cadd") && response.getAsJsonObject("cadd").has("exon") ? response.getAsJsonObject("cadd").getAsJsonPrimitive("exon").getAsString() : "";
 
                     region = "exon";
                 } else if (response.has("cadd") && response.getAsJsonObject("cadd").has("intron")){
-                    if(response.getAsJsonObject("cadd").get("intron").isJsonArray())
-                        regionNum = response.getAsJsonObject("cadd").getAsJsonArray("intron").toString();
+                    if(response.getAsJsonObject("cadd").get("intron").isJsonArray()) {
+                        JsonArray regionNumArray = response.getAsJsonObject("cadd").getAsJsonArray("intron");
+                        StringBuilder finalRegionNum = new StringBuilder(regionNum);
+                        regionNumArray.forEach(regionNumElem -> {
+                            if(finalRegionNum.length() == 0)
+                                finalRegionNum.append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                            else
+                                finalRegionNum.append(",").append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                        });
+                        regionNum = "[" + finalRegionNum.toString() + "]";
+                    }
                     else
                         regionNum = response.has("cadd") && response.getAsJsonObject("cadd").has("intron") ? response.getAsJsonObject("cadd").getAsJsonPrimitive("intron").getAsString() : "";
 
                     region = "intron";
                 }
-                List<String> consStrings = new ArrayList<>();
                 if(response.has("cadd") && response.getAsJsonObject("cadd").has("consequence"))
                     if(response.getAsJsonObject("cadd").get("consequence").isJsonArray()) {
                         JsonArray consequenceArray = response.getAsJsonObject("cadd").getAsJsonArray("consequence");
+                        StringBuilder finalConsequenceArray = new StringBuilder(consequence);
                         for (JsonElement jsonElement : consequenceArray) {
-                            consStrings.add(jsonElement.toString());
+                            if(finalConsequenceArray.length() == 0)
+                                finalConsequenceArray.append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
+                            else
+                                finalConsequenceArray.append(",").append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
                         }
-                    } else
-                        consStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consequence").getAsString());
 
-                List<String> consDetailsStrings = new ArrayList<>();
+                        consequence = finalConsequenceArray.toString();
+                    } else
+                        consequence = response.getAsJsonObject("cadd").getAsJsonPrimitive("consequence").getAsString();
+
                 if(response.has("cadd") && response.getAsJsonObject("cadd").has("consdetail"))
                     if(response.getAsJsonObject("cadd").get("consdetail").isJsonArray()) {
                         JsonArray consequenceDetailsArray = response.getAsJsonObject("cadd").getAsJsonArray("consdetail");
+
+                        StringBuilder finalConsequenceDetailsArray = new StringBuilder(consequenceDetails);
                         for (JsonElement jsonElement : consequenceDetailsArray) {
-                            consDetailsStrings.add(jsonElement.toString());
+                            if(finalConsequenceDetailsArray.length() == 0)
+                                finalConsequenceDetailsArray.append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
+                            else
+                                finalConsequenceDetailsArray.append(",").append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
                         }
+
+                        consequenceDetails = finalConsequenceDetailsArray.toString();
                     } else
-                        consDetailsStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString());
+                        consequenceDetails = response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString();
 
                 synchronized (lock) {
                     try {
                         while(!incrementVariantId())
                             lock.wait();
 
-                        write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, String.valueOf(genesId.get(gene)), region, regionNum, String.valueOf(consStrings), String.valueOf(consDetailsStrings)});
+                        write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, String.valueOf(genesId.get(gene)), region, '"' + regionNum + '"', '"' + consequence + '"', '"' + consequenceDetails + '"'});
 
                         getAlleleFrequencies(response, getVariantId());
                         getClinicalSignificance(response, getVariantId(), pathologies);
@@ -97,47 +135,78 @@ public class Variant {
         else {
             String region = "";
             String regionNum = "";
+            String consequence = "";
+            String consequenceDetails = "";
             if (response.has("cadd") && response.getAsJsonObject("cadd").has("exon")) {
-                if(response.getAsJsonObject("cadd").get("exon").isJsonArray())
-                    regionNum = response.getAsJsonObject("cadd").getAsJsonArray("exon").toString();
+                if(response.getAsJsonObject("cadd").get("exon").isJsonArray()) {
+                    JsonArray regionNumArray = response.getAsJsonObject("cadd").getAsJsonArray("exon");
+                    StringBuilder finalRegionNum = new StringBuilder(regionNum);
+                    regionNumArray.forEach(regionNumElem -> {
+                        if(finalRegionNum.length() == 0)
+                            finalRegionNum.append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                        else
+                            finalRegionNum.append(",").append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                    });
+                    regionNum = "[" + finalRegionNum.toString() + "]";
+                }
+
                 else
                     regionNum = response.has("cadd") && response.getAsJsonObject("cadd").has("exon") ? response.getAsJsonObject("cadd").getAsJsonPrimitive("exon").getAsString() : "";
 
                 region = "exon";
             } else if (response.has("cadd") && response.getAsJsonObject("cadd").has("intron")){
-                if(response.getAsJsonObject("cadd").get("intron").isJsonArray())
-                    regionNum = response.getAsJsonObject("cadd").getAsJsonArray("intron").toString();
+                if(response.getAsJsonObject("cadd").get("intron").isJsonArray()) {
+                    JsonArray regionNumArray = response.getAsJsonObject("cadd").getAsJsonArray("intron");
+                    StringBuilder finalRegionNum = new StringBuilder(regionNum);
+                    regionNumArray.forEach(regionNumElem -> {
+                        if(finalRegionNum.length() == 0)
+                            finalRegionNum.append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                        else
+                            finalRegionNum.append(",").append(regionNumElem.toString().substring(1, regionNumElem.toString().length() - 1));
+                    });
+                    regionNum = "[" + finalRegionNum.toString() + "]";
+                }
                 else
                     regionNum = response.has("cadd") && response.getAsJsonObject("cadd").has("intron") ? response.getAsJsonObject("cadd").getAsJsonPrimitive("intron").getAsString() : "";
 
                 region = "intron";
             }
-            List<String> consStrings = new ArrayList<>();
             if(response.has("cadd") && response.getAsJsonObject("cadd").has("consequence"))
                 if(response.getAsJsonObject("cadd").get("consequence").isJsonArray()) {
                     JsonArray consequenceArray = response.getAsJsonObject("cadd").getAsJsonArray("consequence");
+                    StringBuilder finalConsequenceArray = new StringBuilder(consequence);
                     for (JsonElement jsonElement : consequenceArray) {
-                        consStrings.add(jsonElement.toString());
+                        if(finalConsequenceArray.length() == 0)
+                            finalConsequenceArray.append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
+                        else
+                            finalConsequenceArray.append(",").append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
                     }
-                } else
-                    consStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consequence").getAsString());
 
-            List<String> consDetailsStrings = new ArrayList<>();
+                    consequence = finalConsequenceArray.toString();
+                } else
+                    consequence = response.getAsJsonObject("cadd").getAsJsonPrimitive("consequence").getAsString();
+
             if(response.has("cadd") && response.getAsJsonObject("cadd").has("consdetail"))
                 if(response.getAsJsonObject("cadd").get("consequence").isJsonArray()) {
                     JsonArray consequenceDetailsArray = response.getAsJsonObject("cadd").getAsJsonArray("consdetail");
+                    StringBuilder finalConsequenceDetailsArray = new StringBuilder(consequenceDetails);
                     for (JsonElement jsonElement : consequenceDetailsArray) {
-                        consDetailsStrings.add(jsonElement.toString());
+                        if(finalConsequenceDetailsArray.length() == 0)
+                            finalConsequenceDetailsArray.append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
+                        else
+                            finalConsequenceDetailsArray.append(",").append(jsonElement.toString().substring(1, jsonElement.toString().length() - 1));
                     }
+
+                    consequenceDetails = finalConsequenceDetailsArray.toString();
                 } else
-                    consDetailsStrings.add(response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString());
+                    consequenceDetails = response.getAsJsonObject("cadd").getAsJsonPrimitive("consdetail").getAsString();
 
             synchronized (lock) {
                 try {
                     while(!incrementVariantId())
                         lock.wait();
 
-                    write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, null, region, regionNum, String.valueOf(consStrings), String.valueOf(consDetailsStrings)});
+                    write(new String[]{String.valueOf(getVariantId()), hgvs, chromosome, Integer.toString(start), Integer.toString(end), rsid, reference, alternative, "0", region, '"' + regionNum + '"', '"' + consequence + '"', '"' + consequenceDetails + '"'});
 
                     getAlleleFrequencies(response, getVariantId());
                     getClinicalSignificance(response, getVariantId(), pathologies);

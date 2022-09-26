@@ -19,7 +19,7 @@ public class FileWriterForCsv {
             FileWriter outputfile = new FileWriter (file, true);
 
             // create CSVWriter object filewriter object as parameter
-            CSVWriter writer = new CSVWriter(outputfile, ',', Character.MIN_VALUE);
+            CSVWriter writer = new CSVWriter(outputfile, ',', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER);
 
             // adding header to csv
             if(file.length() == 0)

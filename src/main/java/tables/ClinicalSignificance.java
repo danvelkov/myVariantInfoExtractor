@@ -46,10 +46,13 @@ public class ClinicalSignificance {
                                         String significanceId = getSignificance(significance);
                                         String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
                                         String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+//                                        System.out.println(reviewStatus);
+                                        String formatedReviewStatus = reviewStatus.charAt(0) + "[" + reviewStatus.substring(1, reviewStatus.length() - 1) + "]\"";
+
                                         String updated = String.valueOf(java.time.LocalDate.now());
 
 //                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
-                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, !evaluated.isEmpty() ? evaluated.substring(1, evaluated.length() - 1) : null, formatedReviewStatus, updated});
 
                                         clinicalSignificanceId++;
                                     } else {
@@ -60,8 +63,11 @@ public class ClinicalSignificance {
                                         String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
                                         String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
                                         String updated = String.valueOf(java.time.LocalDate.now());
+//                                        System.out.println(reviewStatus);
+                                        String formatedReviewStatus = reviewStatus.charAt(0) + "[" + reviewStatus.substring(1, reviewStatus.length() - 1) + "]\"";
+
 //                                        System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
+                                        write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, !evaluated.isEmpty() ? evaluated.substring(1, evaluated.length() - 1) : null, formatedReviewStatus, updated});
 
                                         clinicalSignificanceId++;
                                     }
@@ -77,9 +83,12 @@ public class ClinicalSignificance {
                                     String significanceId = getSignificance(significance);
                                     String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
                                     String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+                                    System.out.println(reviewStatus);
+                                    String formatedReviewStatus = reviewStatus.charAt(0) + "[" + reviewStatus.substring(1, reviewStatus.length() - 1) + "]\"";
+
                                     String updated = String.valueOf(java.time.LocalDate.now());
 //                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated, updated}));
-                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), String.valueOf(pathologyId), significanceId, !evaluated.isEmpty() ? evaluated.substring(1, evaluated.length() - 1) : null, formatedReviewStatus, updated});
 
                                     clinicalSignificanceId++;
                                 } else {
@@ -88,9 +97,12 @@ public class ClinicalSignificance {
                                     String significanceId = getSignificance(significance);
                                     String evaluated = rcv.getAsJsonObject().has("last_evaluated") ? rcv.getAsJsonObject().getAsJsonPrimitive("last_evaluated").toString() : "";
                                     String reviewStatus = rcv.getAsJsonObject().has("review_status") ? rcv.getAsJsonObject().getAsJsonPrimitive("review_status").toString() : "";
+//                                    System.out.println(reviewStatus);
+                                    String formatedReviewStatus = reviewStatus.charAt(0) + "[" + reviewStatus.substring(1, reviewStatus.length() - 1) + "]\"";
+
                                     String updated = String.valueOf(java.time.LocalDate.now());
 //                                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
+                                    write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, !evaluated.isEmpty() ? evaluated.substring(1, evaluated.length() - 1) : null, formatedReviewStatus, updated});
 
                                     clinicalSignificanceId++;
                                 }
@@ -104,9 +116,10 @@ public class ClinicalSignificance {
                     String significanceId = getSignificance(significance);
                     String evaluated = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("last_evaluated") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("last_evaluated").toString() : "";
                     String reviewStatus = response.getAsJsonObject("clinvar").getAsJsonObject("rcv").has("review_status") ? response.getAsJsonObject("clinvar").getAsJsonObject("rcv").getAsJsonPrimitive("review_status").toString() : "";
+                    String formatedReviewStatus = reviewStatus.charAt(0) + "[" + reviewStatus.substring(1, reviewStatus.length() - 1) + "]\"";
                     String updated = String.valueOf(java.time.LocalDate.now());
 //                    System.out.println(Arrays.toString(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated, updated}));
-                   write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, evaluated.substring(1, evaluated.length() - 1), reviewStatus, updated});
+                   write(new String[]{String.valueOf(clinicalSignificanceId), accession, String.valueOf(varId), "", significanceId, !evaluated.isEmpty() ? evaluated.substring(1, evaluated.length() - 1) : null, formatedReviewStatus, updated});
 
                     clinicalSignificanceId++;
                 }
